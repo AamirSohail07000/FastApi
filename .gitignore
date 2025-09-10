@@ -1,0 +1,24 @@
+# Python / FastAPI
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Environment variables
+.env
+.env.*
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Node / React
+react/node_modules/
+react/build/
+react/.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
