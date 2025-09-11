@@ -1,19 +1,36 @@
 from fastapi import FastAPI
 from models import *
 
+# Create FastAPI application instance
 app = FastAPI()
 
+# Root endpoint
 @app.get("/")
 def greet():
   return "Welcome to homepage"
 
+# Sample data (acting like a temporary database)
+# Each item is created using the Products model
 products = [
-  Products(id=1, name="phone", description="budget phone", price=105, quantity=12),
-  Products(id=2, name="laptop", description="gaming laptop", price=5000, quantity=5),
-  Products(id=3, name="charger", description="fast charger", price=15, quantity=25),
-  Products(id=4, name="battery", description="long life battery", price=25, quantity=8),
+  Product(id=1, name="phone", description="budget phone", price=105, quantity=12),
+  Product(id=2, name="laptop", description="gaming laptop", price=5000, quantity=5),
+  Product(id=3, name="charger", description="fast charger", price=15, quantity=25),
+  Product(id=4, name="battery", description="long life battery", price=25, quantity=8),
 ]
 
+# return the list of all products defined above
 @app.get("/products")
 def get_all_products():
   return products
+
+@app.get("/product/{id}")
+def get_product_by_id(id: int):
+  for product in products:
+    if product.id == id:
+      return product
+  return "Product not found"  
+
+@app.post("/product")
+def add_product(product : Product):
+    products.append(product)
+    return product
