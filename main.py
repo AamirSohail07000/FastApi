@@ -1,13 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from models import *
+from config import SessionLocal, engine
+import database_models
 
+database_models.Base.metadata.create_all(bind=engine)
 # Create FastAPI application instance
 app = FastAPI()
 
-# Root endpoint
-@app.get("/")
-def greet():
-  return "Welcome to homepage"
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Sample data (acting like a temporary database)
 # Each item is created using the Products model
@@ -18,9 +23,31 @@ products = [
   Product(id=4, name="battery", description="long life battery", price=25, quantity=8),
 ]
 
+def init_db():
+  db = SessionLocal()
+
+  existing_count = db.query(database_models.Product).count()
+
+  if existing_count == 0:
+    for product in products:
+      db.add(database_models.Product(**product.model_dump()))
+    db.commit()
+    print("Database initialized with sample products.")
+
+  db.close()  
+
+init_db()    
+
+# Root endpoint
+@app.get("/")
+def greet():
+  return "Welcome to homepage"
+
 # return the list of all products defined above
 @app.get("/products")
 def get_all_products():
+  # db = session()
+  # db.query()
   return products
 
 # Read product
