@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from models import *
 from config import SessionLocal, engine
 import database_models
@@ -8,6 +9,12 @@ database_models.Base.metadata.create_all(bind=engine)
 # Create FastAPI application instance
 app = FastAPI()
 
+# Middleware 
+app.add_middleware(
+   CORSMiddleware,
+   allow_origins=["http://localhost:3000"],
+   allow_methods = ["*"]
+)
 def get_db():
     db = SessionLocal()
     try:
@@ -60,14 +67,14 @@ def get_product_by_id(id: int, db: Session = Depends(get_db)): # Dependency inje
   return "Product not found"  
 
 # Add product
-@app.post("/product")
+@app.post("/products")
 def add_product(product : Product, db: Session = Depends(get_db)): # Dependency injection
     db.add(database_models.Product(**product.model_dump()))
     db.commit()
     return product
     
 # Update product, First check if product is there in db , then update it
-@app.put("/product")
+@app.put("/products/{id}")
 def update_product(id: int, product: Product, db: Session = Depends(get_db)): # Dependency injection
 
   db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first()
@@ -81,10 +88,12 @@ def update_product(id: int, product: Product, db: Session = Depends(get_db)): # 
   else:  
     return "No product found"
 
-@app.delete("/product")
-def delete_product(id: int):
-  for i in range(len(products)):
-    if products[i].id == id:
-      del products[i]
+@app.delete("/products/{id}")
+def delete_product(id: int, db: Session = Depends(get_db)): # Dependency injection
+  db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first()
+  if db_product:
+      db.delete(db_product)
+      db.commit()
       return "Product Deleted"
-  return "Product not found"  
+  else:
+     return "Product not found"  

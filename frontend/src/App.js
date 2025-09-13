@@ -198,8 +198,8 @@ function App() {
     <div className="app-bg">
       <header className="topbar">
         <div className="brand">
-          <span className="brand-badge">📦</span>
-          <h1>Telusko Trac</h1>
+          {/* <span className="brand-badge"></span> */}
+          <h1>Learning FastAPI</h1>
         </div>
         <div className="top-actions">
           <button className="btn btn-light" onClick={fetchProducts} disabled={loading}>
