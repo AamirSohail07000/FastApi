@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from models import *
 from config import SessionLocal, engine
 import database_models
+from sqlalchemy.orm import Session
 
 database_models.Base.metadata.create_all(bind=engine)
 # Create FastAPI application instance
@@ -13,6 +14,11 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Root endpoint
+@app.get("/")
+def greet():
+  return "Welcome to homepage"        
 
 # Sample data (acting like a temporary database)
 # Each item is created using the Products model
@@ -38,24 +44,19 @@ def init_db():
 
 init_db()    
 
-# Root endpoint
-@app.get("/")
-def greet():
-  return "Welcome to homepage"
-
 # return the list of all products defined above
 @app.get("/products")
-def get_all_products():
-  # db = session()
-  # db.query()
-  return products
+def get_all_products(db: Session = Depends(get_db)): # Dependency injection
+
+  db_products = db.query(database_models.Product).all()
+  return db_products
 
 # Read product
-@app.get("/product/{id}")
-def get_product_by_id(id: int):
-  for product in products:
-    if product.id == id:
-      return product
+@app.get("/products/{id}")
+def get_product_by_id(id: int, db: Session = Depends(get_db)): # Dependency injection
+  db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first()
+  if db_product:
+    return db_product
   return "Product not found"  
 
 # Add product
